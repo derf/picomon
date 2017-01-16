@@ -1,1 +1,16 @@
-<p>ohai!</p>
+<div>
+	<table>
+		<tr>
+			<th>Hostname</th>
+			<th>Load</th>
+			<th>OS</th>
+		</tr>
+		% for my $host (@{$hosts}) {
+			<tr>
+				<td><%= $host->{hostname} %></td>
+				<td><%= $host->{load15} %></td>
+				<td>Debian <%= $host->{debian} %></td>
+			</tr>
+		% }
+	</table>
+</div>

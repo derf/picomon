@@ -1,7 +1,6 @@
 #!/usr/bin/env perl
 
 use Mojolicious::Lite;
-use Data::Dumper;
 use DateTime;
 use DBI;
 use 5.020;
@@ -70,9 +69,22 @@ app->attr( dbh => sub { return $dbh } );
 
 get '/' => sub {
 	my ($self) = @_;
+	my @hostdata;
+
+	my $hostdata_raw = $dbh->selectall_arrayref(
+		qq{select * from hostdata order by last_contact desc}
+	);
+	my @fields = (qw(hostname contact), @int_fields, @text_fields);
+
+	for my $host (@{$hostdata_raw}) {
+		push(@hostdata, {
+			map { ($fields[$_], $host->[$_]) } (0 .. $#fields)
+		});
+	}
 
 	$self->render(
 		'main',
+		hosts => \@hostdata,
 		version => $VERSION,
 	);
 };
