@@ -144,7 +144,7 @@ post '/update' => sub {
 
 app->config(
 	hypnotoad => {
-		listen => [ $ENV{PICOMON_LISTEN} // 'http://*:8099' ],
+		listen => [ $ENV{LISTEN} // 'http://*:8099' ],
 		pid_file => '/tmp/picomon.pid',
 		workers  => 1,
 	},
