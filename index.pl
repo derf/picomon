@@ -8,7 +8,7 @@ use utf8;
 
 our $VERSION = qx{git describe --dirty} || '0.00';
 
-my $dbh = DBI->connect( "dbi:SQLite:dbname=picomon.sqlite", q{}, q{} );
+my $dbh = DBI->connect( "dbi:SQLite:dbname=cache/picomon.sqlite", q{}, q{} );
 
 my @int_fields = (
 	qw(
