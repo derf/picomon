@@ -69,23 +69,35 @@ app->attr( dbh => sub { return $dbh } );
 
 get '/' => sub {
 	my ($self) = @_;
+	my $epoch = DateTime->now( time_zone => 'Europe/Berlin' )->epoch;
 	my @hostdata;
+	my @olddata;
+	my @curdata;
 
 	my $hostdata_raw = $dbh->selectall_arrayref(
-		qq{select * from hostdata order by last_contact desc}
-	);
-	my @fields = (qw(hostname contact), @int_fields, @text_fields);
+		qq{select * from hostdata order by last_contact desc});
+	my @fields = ( qw(hostname last_contact), @int_fields, @text_fields );
 
-	for my $host (@{$hostdata_raw}) {
-		push(@hostdata, {
-			map { ($fields[$_], $host->[$_]) } (0 .. $#fields)
-		});
+	for my $host ( @{$hostdata_raw} ) {
+		my $hostref
+		  = { map { ( $fields[$_], $host->[$_] ) } ( 0 .. $#fields ) };
+		push( @hostdata, $hostref );
+		if ( $epoch - $hostref->{last_contact} < ( 31 * 60 ) ) {
+			push( @curdata, $hostref );
+		}
+		else {
+			push( @olddata, $hostref );
+		}
 	}
+
+	@curdata = sort { $a->{hostname} cmp $b->{hostname} } @curdata;
 
 	$self->render(
 		'main',
-		hosts => \@hostdata,
-		version => $VERSION,
+		active_hosts => \@curdata,
+		hosts        => \@hostdata,
+		old_hosts    => \@olddata,
+		version      => $VERSION,
 	);
 };
 
