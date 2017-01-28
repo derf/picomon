@@ -1,0 +1,1 @@
+curl -F hostname="$(cat /etc/hostname)" -F fullname="$(hostname -f)" -F uptime="$(cat /proc/uptime)" -F load="$(cat /proc/loadavg)" -F uname="$(uname -sr)" -F df="$(df -l)" -F meminfo="$(cat /proc/meminfo)" -F cpus="$(lscpu)" -F debian="$(cat /etc/debian_version)" -F temps1="$(cat /sys/class/hwmon/hwmon*/temp*_input)" -F temps2="$(cat /sys/class/thermal/thermal_zone*/temp)"
