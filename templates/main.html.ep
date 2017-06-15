@@ -4,12 +4,19 @@
 		<tr>
 			<th>Hostname</th>
 			<th>Load</th>
+			<th>Memory</th>
 			<th>OS</th>
 		</tr>
 		% for my $host (@{$active_hosts}) {
 			<tr>
 				<td><%= $host->{hostname} %></td>
 				<td><%= $host->{load15} %></td>
+				% if (exists $host->{mem_used_ratio}) {
+					<td><%= sprintf('%.1f%%', $host->{mem_used_ratio} * 100) %></td>
+				% }
+				% else {
+					<td><%= sprintf('%d MB', $host->{mem_total} / 1024) %></td>
+				% }
 				<td>Debian <%= $host->{debian_version} %></td>
 			</tr>
 		% }

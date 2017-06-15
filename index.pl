@@ -67,6 +67,26 @@ sub update_db {
 app->defaults( layout => 'default' );
 app->attr( dbh => sub { return $dbh } );
 
+sub parse_df {
+	my ($df_raw) = @_;
+
+	my %ret;
+
+	for my $line ( split( /\n/, $df_raw ) ) {
+		my ( $fs, $size, $used, $available, $usepct, $mountpoint )
+		  = split( /\s+/, $line );
+		$ret{$mountpoint} = {
+			filesystem  => $fs,
+			size        => $size,
+			used        => $used,
+			available   => $available,
+			use_percent => $usepct,
+		};
+	}
+
+	return \%ret;
+}
+
 get '/' => sub {
 	my ($self) = @_;
 	my $epoch = DateTime->now( time_zone => 'Europe/Berlin' )->epoch;
@@ -81,6 +101,15 @@ get '/' => sub {
 	for my $host ( @{$hostdata_raw} ) {
 		my $hostref
 		  = { map { ( $fields[$_], $host->[$_] ) } ( 0 .. $#fields ) };
+
+		$hostref->{disks} = parse_df( $hostref->{df_raw} );
+		delete $hostref->{df_raw};
+
+		if ( $hostref->{mem_available} and $hostref->{mem_total} ) {
+			$hostref->{mem_used_ratio}
+			  = 1 - ( $hostref->{mem_available} / $hostref->{mem_total} );
+		}
+
 		push( @hostdata, $hostref );
 		if ( $epoch - $hostref->{last_contact} < ( 31 * 60 ) ) {
 			push( @curdata, $hostref );
