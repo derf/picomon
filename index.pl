@@ -22,6 +22,7 @@ my @text_fields = (
 	qw(
 	  debian_version
 	  df_raw
+	  ip_raw
 	  kernel_version
 	  os
 	  )
@@ -164,6 +165,9 @@ post '/update' => sub {
 	}
 	if ( exists $param->{df} ) {
 		$data{df_raw} = $param->{df};
+	}
+	if ( exists $param->{ip} ) {
+		$data{ip_raw} = $param->{ip};
 	}
 	if ( exists $param->{meminfo} ) {
 		my %meminfo
