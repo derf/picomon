@@ -13,7 +13,7 @@ my $dbh = DBI->connect( "dbi:SQLite:dbname=cache/picomon.sqlite", q{}, q{} );
 my @int_fields = (
 	qw(
 	  load1 load5 load15 num_threads
-	  mem_total mem_free mem_available
+	  mem_total mem_free mem_available mem_buffers mem_cached mem_shared
 	  swap_total swap_free
 	  uptime
 	  )
@@ -110,6 +110,13 @@ get '/' => sub {
 			$hostref->{mem_used_ratio}
 			  = 1 - ( $hostref->{mem_available} / $hostref->{mem_total} );
 		}
+		elsif ( $hostref->{mem_total} and $hostref->{mem_free} ) {
+			$hostref->{mem_used_ratio}
+			  = (   $hostref->{mem_total}
+				  - $hostref->{mem_free}
+				  - $hostref->{mem_buffers}
+				  - $hostref->{mem_cached} ) / $hostref->{mem_total};
+		}
 
 		push( @hostdata, $hostref );
 		if ( $epoch - $hostref->{last_contact} < ( 31 * 60 ) ) {
@@ -175,6 +182,9 @@ post '/update' => sub {
 		$data{mem_total}     = $meminfo{MemTotal};
 		$data{mem_free}      = $meminfo{MemFree};
 		$data{mem_available} = $meminfo{MemAvailable};
+		$data{mem_buffers}   = $meminfo{Buffers};
+		$data{mem_cached}    = $meminfo{Cached};
+		$data{mem_shared}    = $meminfo{Shmem};
 		$data{swap_total}    = $meminfo{SwapTotal};
 		$data{swap_free}     = $meminfo{SwapFree};
 	}
